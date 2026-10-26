@@ -1,0 +1,225 @@
+{
+  "info": {
+    "_postman_id": "4d22f851-abca-4ed1-ad0a-b993a67293c9",
+    "name": "swager-petstore",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58978915",
+    "_collection_link": "https://go.postman.co/collection/58978915-4d22f851-abca-4ed1-ad0a-b993a67293c9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "create pet",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"petid\",pm.response.json().id);\n\nconst schema = {\n  type: \"object\",\n  required: [\"id\", \"name\", \"status\", \"photoUrls\"],\n  properties: {\n    id: { type: \"number\" },\n    name: { type: \"string\" },\n    status: { type: \"string\", enum: [\"available\", \"pending\", \"sold\"] },\n    photoUrls: {\n      type: \"array\",\n      items: { type: \"string\" }\n    },\n    category: {\n      type: \"object\",\n      properties: {\n        id: { type: \"number\" },\n        name: { type: \"string\" }\n      }\n    },\n    tags: {\n      type: \"array\",\n      items: {\n        type: \"object\",\n        properties: {\n          id: { type: \"number\" },\n          name: { type: \"string\" }\n        }\n      }\n    }\n  }\n};\n\npm.test(\"Response schema is valid\", function () {\n  pm.response.to.have.jsonSchema(schema);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 987654321,\n  \"name\": \"doggie\",\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"Dogs\"\n  },\n  \"photoUrls\": [\n    \"\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 0,\n      \"name\": \"goggie\"\n    }\n  ],\n  \"status\": \"available\"\n}\n ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/pet",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "pet"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "upload-pet-Image",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const schema = {\n  type: \"object\",\n  required: [\"id\", \"name\", \"status\", \"photoUrls\"],\n  properties: {\n    id: { type: \"number\" },\n    name: { type: \"string\" },\n    status: { type: \"string\", enum: [\"available\", \"pending\", \"sold\"] },\n    photoUrls: {\n      type: \"array\",\n      items: { type: \"string\" }\n    },\n    category: {\n      type: \"object\",\n      properties: {\n        id: { type: \"number\" },\n        name: { type: \"string\" }\n      }\n    },\n    tags: {\n      type: \"array\",\n      items: {\n        type: \"object\",\n        properties: {\n          id: { type: \"number\" },\n          name: { type: \"string\" }\n        }\n      }\n    }\n  }\n};\n\npm.test(\"Response schema is valid\", function () {\n  pm.response.to.have.jsonSchema(schema);\n});"
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {}
+      },
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/octet-stream"
+          }
+        ],
+        "body": {
+          "mode": "file",
+          "file": {
+            "src": "/Users/atani/Desktop/Atani/ Retriever in the Park.png"
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/pet/{{petid}}/uploadImage?additionalMetadata=dog photo",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "pet",
+            "{{petid}}",
+            "uploadImage"
+          ],
+          "query": [
+            {
+              "key": "additionalMetadata",
+              "value": "dog photo"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update petid",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const schema = {\n  type: \"object\",\n  required: [\"id\", \"name\", \"status\", \"photoUrls\"],\n  properties: {\n    id: { type: \"number\" },\n    name: { type: \"string\" },\n    status: { type: \"string\", enum: [\"available\", \"pending\", \"sold\"] },\n    photoUrls: {\n      type: \"array\",\n      items: { type: \"string\" }\n    },\n    category: {\n      type: \"object\",\n      properties: {\n        id: { type: \"number\" },\n        name: { type: \"string\" }\n      }\n    },\n    tags: {\n      type: \"array\",\n      items: {\n        type: \"object\",\n        properties: {\n          id: { type: \"number\" },\n          name: { type: \"string\" }\n        }\n      }\n    }\n  }\n};\n\npm.test(\"Response schema is valid\", function () {\n  pm.response.to.have.jsonSchema(schema);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/pet/{{petid}}?name=rocky&status=sold",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "pet",
+            "{{petid}}"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "rocky"
+            },
+            {
+              "key": "status",
+              "value": "sold"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete-petid",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\n  pm.response.to.have.status(200);\n});\n\npm.test(\"Response body contains 'Pet deleted'\", function () {\n  pm.expect(pm.response.text()).to.include(\"Pet deleted\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/pet/{{petid}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "pet",
+            "{{petid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "verify",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {\n  pm.response.to.have.status(404);\n});\n\npm.test(\"Response body contains 'Pet not found'\", function () {\n  pm.expect(pm.response.text()).to.include(\"Pet not found\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/pet/{{petid}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "pet",
+            "{{petid}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
