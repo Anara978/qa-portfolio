@@ -16,4 +16,8 @@ This folder contains my API testing practice projects.
 - Recruiter login
 - Create and update position
 - Create and delete application
-- Logout and token verificationAPI testing
+- Logout and token verification
+
+## Project Files
+- recruit-e2e-v2.postman_collection.json`
+— End-to-end API testing collection created in Postman.
