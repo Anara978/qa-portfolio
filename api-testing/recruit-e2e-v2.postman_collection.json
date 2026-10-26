@@ -1,0 +1,470 @@
+{
+  "info": {
+    "_postman_id": "a88e05c9-a251-4f64-83bc-1f6dc57ceb02",
+    "name": "recruit-e2e -v2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58978915",
+    "_collection_link": "https://go.postman.co/collection/58978915-a88e05c9-a251-4f64-83bc-1f6dc57ceb02?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Register new Candidate",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var date = new \nDate().getMilliseconds();\nvar email = \"migen\" + date +\n\"@fake.com\";\npm.environment.set(\"email\",email);\n\nconsole.log(email);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"candidateId\", pm.response.json().id);\n\npm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Migen\",\n  \"middleName\": \"\",\n  \"lastName\": \"Kim\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{candidatePassword}}\",\n  \"address\": \"2019 Broklyn\",\n  \"city\": \"NY\",\n  \"state\": \"NY\",\n  \"zip\": \"20381\",\n  \"summary\": \"QA student with interest in automation testing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/candidates",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "candidates"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "candidate login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var candidateToken =\npm.response.json().token;\npm.environment.set(\"candidateToken\",candidateToken);\n\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"authenticated is true\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.authenticated).to.be.true;\n});\n\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"authenticated\", \"token\", \"issuedAt\", \"expiresAt\"],\n        properties: {\n            authenticated: { type: \"boolean\" },\n            token: { type: \"string\" },\n            issuedAt: { type: \"number\" },\n            expiresAt: { type: \"number\" }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{email}}\",\n\"password\": \"{{candidatePassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/login",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "recruiter-login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var recruiterToken =\npm.response.json().token;\npm.environment.set(\"recruiterToken\",recruiterToken);\n\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"authenticated\", \"token\", \"issuedAt\", \"expiresAt\"],\n        properties: {\n            authenticated: { type: \"boolean\" },\n            token: { type: \"string\" },\n            issuedAt: { type: \"number\" },\n            expiresAt: { type: \"number\" }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"student@example.com\",\n\"password\": \"welcome\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/login",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "new position",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"positionId\", pm.response.json().id);\n\npm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"Response has position id\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"id\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{recruiterToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Artem's test position\",\n  \"address\": \"123 Main St\",\n  \"city\": \"\",\n  \"state\": \"\",\n  \"zip\": \"00000\",\n  \"description\": \"\",\n  \"dateOpen\": \"2026-10-22\",\n  \"company\": \"Portnov School\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/positions",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "positions"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "new application",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"applicationid\", pm.response.json().id);\n\npm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"Response has application id\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"id\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{candidateToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"candidateId\": {{candidateId}},\n  \"positionId\": {{positionId}},\n  \"dateApplied\": \"2026-10-21\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/applications",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update position",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response has position id\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"id\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{recruiterToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Artem's test position (UPDATED)\",\n  \"address\": \"123 Main St\",\n  \"city\": \"\",\n  \"state\": \"\",\n  \"zip\": \"00000\",\n  \"description\": \"\",\n  \"dateOpen\": \"2026-10-22\",\n  \"company\": \"Portnov School\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/positions/{{positionId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "positions",
+            "{{positionId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete application",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {\n    pm.response.to.have.status(204);\n});\n\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.be.empty;\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{candidateToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/applications/{{applicationid}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "applications",
+            "{{applicationid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete candidate",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {\n    pm.response.to.have.status(204);\n});\n\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.be.empty;\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{candidateToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/candidates/{{candidateId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "candidates",
+            "{{candidateId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "candidate logout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{candidateToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/logout",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "logout"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "verify",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{candidateToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/verify",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "verify"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete position",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{recruiterToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Artem's test position\",\n  \"address\": \"123 Main St\",\n  \"city\": \"\",\n  \"state\": \"\",\n  \"zip\": \"00000\",\n  \"description\": \"\",\n  \"dateOpen\": \"2026-10-22\",\n  \"company\": \"Portnov School\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/positions/{{positionId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "positions",
+            "{{positionId}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "candidateEmail",
+      "value": ""
+    }
+  ]
+}
