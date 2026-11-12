@@ -61,9 +61,31 @@
         }
       ],
       "protocolProfileBehavior": {
-        "disabledSystemHeaders": {}
+        "disabledSystemHeaders": {
+          "content-type": true
+        }
       },
       "request": {
+        "auth": {
+          "type": "apikey",
+          "apikey": [
+            {
+              "key": "key",
+              "value": "api_key",
+              "type": "string"
+            },
+            {
+              "key": "value",
+              "value": "special-key",
+              "type": "string"
+            },
+            {
+              "key": "in",
+              "value": "header",
+              "type": "string"
+            }
+          ]
+        },
         "method": "POST",
         "header": [
           {
