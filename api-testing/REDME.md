@@ -54,11 +54,11 @@ An end-to-end REST API testing workflow for a recruitment system using Postman. 
 | --- | --- |
 | Run date | November 19, 2026 |
 | Collection requests | 14 |
-| Automated tests | 116 passed (reported from local Postman run) |
-| Execution time | Approximately 1 second |
+| Automated tests | 116 passed, 0 failed (verified from exported Postman Runner report) |
+| Execution time | 1,251 ms |
 | Execution | Postman Collection Runner, environment `e2e` |
 
-The run results above were reported from Postman; the separate Runner report is not included in this repository.
+[View the sanitized Postman Collection Runner report](recruit-e2e-v2-test-run-results.json). The report preserves HTTP statuses and test outcomes without exposing session credentials or dynamic record IDs.
 
 ### Running the Collection
 
