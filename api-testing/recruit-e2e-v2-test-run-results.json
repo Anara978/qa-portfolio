@@ -1,0 +1,701 @@
+{
+  "report_type": "Postman Collection Runner - sanitized evidence",
+  "collection": "recruit-e2e -v2",
+  "run_date_utc": "2026-11-19T16:49:14.920Z",
+  "status": "finished",
+  "iterations": 1,
+  "requests_executed": 14,
+  "tests_passed": 116,
+  "tests_failed": 0,
+  "total_duration_ms": 1251,
+  "note": "Public portfolio copy omits run and environment identifiers, dynamic record IDs, complete URLs and authentication credentials. Postman combines duplicate-named tests in request-level detail, but the overall total reflects all executions.",
+  "requests": [
+    {
+      "name": "Register new Candidate",
+      "method": "POST",
+      "http_status": 201,
+      "response_time_ms": 107,
+      "test_results": [
+        {
+          "name": "Status code is 201 Created",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is a non-null object",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response contains a valid positive numeric candidate ID",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response firstName matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response lastName matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response email matches dynamically generated email",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Required string fields are present with correct types",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "middleName field is present and is a string",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Plaintext password is not exposed in the response",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "candidateId is saved to environment when valid ID is returned",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "candidate login",
+      "method": "POST",
+      "http_status": 200,
+      "response_time_ms": 105,
+      "test_results": [
+        {
+          "name": "Status code is 200 OK",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "authenticated is true",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "token is a non-empty string",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "issuedAt is a positive number",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "expiresAt is a positive number greater than issuedAt",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Plaintext password is not exposed in the response",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "candidateToken saved to environment after successful auth and valid token",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "recruiter-login",
+      "method": "POST",
+      "http_status": 200,
+      "response_time_ms": 106,
+      "test_results": [
+        {
+          "name": "Status code is 200 OK",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "authenticated is true",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "token is a non-empty string",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "issuedAt is a positive number",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "expiresAt is a positive number greater than issuedAt",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Plaintext password is not exposed in the response",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "recruiterToken saved to environment after successful auth and valid token",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "new position",
+      "method": "POST",
+      "http_status": 201,
+      "response_time_ms": 82,
+      "test_results": [
+        {
+          "name": "Status code is 201 Created",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is a non-null object",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response contains a valid positive integer position ID",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response title matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response company matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response dateOpen matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response address matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "positionId saved to environment after validating ID",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "new application",
+      "method": "POST",
+      "http_status": 201,
+      "response_time_ms": 80,
+      "test_results": [
+        {
+          "name": "Status code is 201 Created",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is a non-null object",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response contains a valid positive integer application ID",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response candidateId matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response positionId matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response dateApplied matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "applicationid saved to environment after validating ID",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "update position",
+      "method": "PUT",
+      "http_status": 200,
+      "response_time_ms": 80,
+      "test_results": [
+        {
+          "name": "Status code is 200 OK",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is a non-null object",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response contains a valid positive integer position ID",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Returned position ID matches saved positionId environment variable",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response title matches updated request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response company matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response dateOpen matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response address matches request body",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Expected position fields saved to environment for GET verification",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "get position by Id",
+      "method": "GET",
+      "http_status": 200,
+      "response_time_ms": 80,
+      "test_results": [
+        {
+          "name": "Status code is 200 OK",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is a non-null object",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response contains a valid positive integer position ID",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Returned position ID matches saved positionId environment variable",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "title matches expectedPositionTitle set by Update Position",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "company matches expectedPositionCompany set by Update Position",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "address matches expectedPositionAddress set by Update Position",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "dateOpen matches expectedPositionDateOpen set by Update Position",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "candidatesCount is a non-negative integer",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "delete application",
+      "method": "DELETE",
+      "http_status": 204,
+      "response_time_ms": 83,
+      "test_results": [
+        {
+          "name": "Status code is 204 No Content",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is empty",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "applicationid env var was set before deletion",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "applicationid removed from environment after successful deletion",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "verify positiive",
+      "method": "POST",
+      "http_status": 200,
+      "response_time_ms": 80,
+      "test_results": [
+        {
+          "name": "Status code is 200 OK",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is a non-null object",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response contains a valid positive integer candidate ID",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Returned candidate ID matches saved candidateId environment variable",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Returned email matches saved email environment variable",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "firstName is a non-empty string",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "lastName is a non-empty string",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "middleName is present and is a string",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "token is a non-empty string",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "issuedAt is a positive number",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "expiresAt is a positive number greater than issuedAt",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Plaintext password is not exposed in the response",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "candidate logout",
+      "method": "POST",
+      "http_status": 200,
+      "response_time_ms": 101,
+      "test_results": [
+        {
+          "name": "Status code is 200 OK",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is a non-null object",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "authenticated is false after logout",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "token is null after logout",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "candidateToken removed from environment after successful logout",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "verify negative",
+      "method": "POST",
+      "http_status": 401,
+      "response_time_ms": 80,
+      "test_results": [
+        {
+          "name": "Previous candidate token is available",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Status code is 401 Unauthorized",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "authenticated is false",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Error message is Invalid token",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Temporary token is cleared after successful verification",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "candidate login again",
+      "method": "POST",
+      "http_status": 200,
+      "response_time_ms": 105,
+      "test_results": [
+        {
+          "name": "Status code is 200 OK",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Content-Type header is application/json",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "authenticated is true",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response schema is valid",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "token is a non-empty string",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "issuedAt is a positive number",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "expiresAt is a positive number greater than issuedAt",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Plaintext password is not exposed in the response",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "candidateToken saved to environment after successful auth and valid token",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "delete candidate",
+      "method": "DELETE",
+      "http_status": 204,
+      "response_time_ms": 81,
+      "test_results": [
+        {
+          "name": "Status code is 204",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is empty",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Status code is 204 No Content",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    },
+    {
+      "name": "delete position",
+      "method": "DELETE",
+      "http_status": 204,
+      "response_time_ms": 81,
+      "test_results": [
+        {
+          "name": "Status code is 204",
+          "pass": 1,
+          "fail": 0
+        },
+        {
+          "name": "Response body is empty",
+          "pass": 1,
+          "fail": 0
+        }
+      ]
+    }
+  ]
+}
