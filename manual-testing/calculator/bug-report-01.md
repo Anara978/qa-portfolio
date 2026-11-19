@@ -45,7 +45,23 @@ This is an investigation finding, not confirmation that a code fix has been appl
 
 ## Evidence
 
-The original [Calculator Testing — Bug Report 1 (Google Docs)](https://docs.google.com/document/d/1i3UwSWO1wzxU2BAVB_SXlv9zy6Xyc5AwtYLsj9Mbi1Q/edit) contains three screenshots from the test and DevTools investigation. These screenshots are linked in the source document; they have **not** yet been copied into this repository. Access to the linked document may depend on its sharing settings.
+The following screenshots were extracted from the original Word report and are included in this repository.
+
+**1. Button 7 not responding — 400 × 740 px (Chrome DevTools)**
+
+![Calculator viewport 400 by 740 pixels, with an invisible div overlapping button 7](screenshots/viewport-400x740.webp)
+
+**2. Button 8 not responding — 600 × 700 px (Chrome DevTools)**
+
+![Calculator viewport 600 by 700 pixels, with an invisible div overlapping button 8](screenshots/viewport-600x700.webp)
+
+**3. Additional element inspection — Safari Web Inspector**
+
+![Calculator with Safari Web Inspector showing the overlapping element and layout box](screenshots/devtools-css-box-model.webp)
+
+The Safari screenshot documents inspection of the same element; it does **not** establish that the click bug was reproduced in Safari.
+
+[Original formatted report in Google Docs](https://docs.google.com/document/d/1i3UwSWO1wzxU2BAVB_SXlv9zy6Xyc5AwtYLsj9Mbi1Q/edit)
 
 ## Scope and Limitations
 
