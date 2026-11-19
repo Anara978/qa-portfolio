@@ -19,9 +19,52 @@ This folder contains my API testing practice projects.
 - Logout and token verification
 
 ## Project Files
-- recruit-e2e-v2.postman_collection.json`
-— End-to-end API testing collection created in Postman.
+- [recruit-e2e-v2.postman_collection.json](recruit-e2e-v2.postman_collection.json) — End-to-end API testing collection created in Postman.
 
+
+## Recruit E2E API Testing — Postman
+
+[View the Postman collection](recruit-e2e-v2.postman_collection.json)
+
+An end-to-end REST API testing workflow for a recruitment system using Postman. The collection covers candidate and recruiter authentication, position and application lifecycle operations, response validation, and environment-variable management.
+
+### End-to-End Flow
+
+1. Register a candidate and log in
+2. Log in as a recruiter and create a position
+3. Submit an application
+4. Update the position and verify it with GET by ID
+5. Delete the application
+6. Verify the active candidate token (positive test)
+7. Log out and verify the old token is rejected with HTTP 401 (negative test)
+8. Log in again and delete the candidate
+9. Delete the position
+
+### Automated Checks
+
+- HTTP status codes and response-body validation
+- JSON schema and returned-field validation
+- Dynamic IDs shared between dependent requests
+- Bearer-token authentication and logout verification
+- Cleanup of temporary test data
+
+### Collection Runner Results
+
+| Metric | Result |
+| --- | --- |
+| Run date | November 19, 2026 |
+| Collection requests | 14 |
+| Automated tests | 116 passed (reported from local Postman run) |
+| Execution time | Approximately 1 second |
+| Execution | Postman Collection Runner, environment `e2e` |
+
+The run results above were reported from Postman; the separate Runner report is not included in this repository.
+
+### Running the Collection
+
+Import the collection into Postman and configure an `e2e` environment with `baseURL`, `candidatePassword`, `recruiterEmail`, and `recruiterPassword`. Request scripts generate and store the temporary candidate, position, application, and token variables used throughout the flow.
+
+Credentials and live authentication tokens are **not included** in the published collection.
 
 ## Swagger Petstore API Project
 
