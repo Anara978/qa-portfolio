@@ -24,7 +24,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.environment.set(\"candidateId\", pm.response.json().id);\n\npm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});"
+              "// ─── Parse response & request body once ───────────────────────────────────────\nconst res       = pm.response.json();\nconst reqBody   = JSON.parse(pm.request.body.raw);\nconst sentEmail = pm.environment.get(\"email\");\n\n// ─── 1. HTTP status ────────────────────────────────────────────────────────────\npm.test(\"Status code is 201 Created\", function () {\n    pm.response.to.have.status(201);\n});\n\n// ─── 2. Content-Type is JSON ───────────────────────────────────────────────────\npm.test(\"Content-Type header is application/json\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\"),\n        \"Expected Content-Type to contain 'application/json'\"\n    ).to.include(\"application/json\");\n});\n\n// ─── 3. Response body is an object (not array, not null) ──────────────────────\npm.test(\"Response body is a non-null object\", function () {\n    pm.expect(res).to.be.an(\"object\").and.not.be.null;\n    pm.expect(Array.isArray(res)).to.be.false;\n});\n\n// ─── 4. Candidate ID is a valid positive integer ──────────────────────────────\npm.test(\"Response contains a valid positive numeric candidate ID\", function () {\n    pm.expect(res.id, \"id field must exist\").to.not.be.undefined;\n    pm.expect(res.id, \"id must be a number\").to.be.a(\"number\");\n    pm.expect(res.id, \"id must be a positive integer\").to.be.above(0);\n    pm.expect(Number.isInteger(res.id), \"id must be an integer, not a float\").to.be.true;\n});\n\n// ─── 5. firstName matches request body ────────────────────────────────────────\npm.test(\"Response firstName matches request body\", function () {\n    pm.expect(res.firstName, \"firstName mismatch\").to.eql(reqBody.firstName);\n});\n\n// ─── 6. lastName matches request body ─────────────────────────────────────────\npm.test(\"Response lastName matches request body\", function () {\n    pm.expect(res.lastName, \"lastName mismatch\").to.eql(reqBody.lastName);\n});\n\n// ─── 7. email matches the dynamically generated email env variable ─────────────\npm.test(\"Response email matches dynamically generated email\", function () {\n    pm.expect(res.email, \"email mismatch — check {{email}} env var\").to.eql(sentEmail);\n});\n\n// ─── 8. Required string fields are present and non-empty ──────────────────────\npm.test(\"Required string fields are present with correct types\", function () {\n    const stringFields = [\"firstName\", \"lastName\", \"email\", \"address\", \"city\", \"state\", \"zip\", \"summary\"];\n    stringFields.forEach(function (field) {\n        pm.expect(res[field], `'${field}' must exist`).to.not.be.undefined;\n        pm.expect(res[field], `'${field}' must be a string`).to.be.a(\"string\");\n        pm.expect(res[field].length, `'${field}' must not be empty`).to.be.above(0);\n    });\n});\n\n// ─── 9. middleName is present and is a string (may be empty) ──────────────────\npm.test(\"middleName field is present and is a string\", function () {\n    pm.expect(res.middleName, \"middleName must exist\").to.not.be.undefined;\n    pm.expect(res.middleName, \"middleName must be a string\").to.be.a(\"string\");\n});\n\n// ─── 10. Plaintext password is NOT returned in the response ───────────────────\npm.test(\"Plaintext password is not exposed in the response\", function () {\n    const plainPassword = pm.environment.get(\"candidatePassword\");\n    pm.expect(res.password, \"Plaintext password must not be returned\").to.not.eql(plainPassword);\n    // NOTE: The API does return a bcrypt hash in the 'password' field.\n    // This test confirms the plaintext value is not echoed back.\n    // Ideally the password field should be omitted entirely from the response.\n});\n\n// ─── 11. Save candidateId to environment only when ID is valid ─────────────────\npm.test(\"candidateId is saved to environment when valid ID is returned\", function () {\n    if (res.id && typeof res.id === \"number\" && res.id > 0) {\n        pm.environment.set(\"candidateId\", res.id);\n        pm.expect(pm.environment.get(\"candidateId\"), \"candidateId env var must match response id\").to.eql(res.id);\n    } else {\n        pm.expect.fail(\"No valid id in response — candidateId was NOT saved to environment\");\n    }\n});"
             ]
           }
         }
@@ -61,12 +61,15 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "var candidateToken =\npm.response.json().token;\npm.environment.set(\"candidateToken\",candidateToken);\n\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"authenticated is true\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData.authenticated).to.be.true;\n});\n\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"authenticated\", \"token\", \"issuedAt\", \"expiresAt\"],\n        properties: {\n            authenticated: { type: \"boolean\" },\n            token: { type: \"string\" },\n            issuedAt: { type: \"number\" },\n            expiresAt: { type: \"number\" }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});"
+              "// ─── Parse response once ──────────────────────────────────────────────────────\nconst res = pm.response.json();\n\n// ─── 1. HTTP 200 OK ───────────────────────────────────────────────────────────\npm.test(\"Status code is 200 OK\", function () {\n    pm.response.to.have.status(200);\n});\n\n// ─── 2. Content-Type is JSON ──────────────────────────────────────────────────\npm.test(\"Content-Type header is application/json\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\"),\n        \"Expected Content-Type to contain 'application/json'\"\n    ).to.include(\"application/json\");\n});\n\n// ─── 3. authenticated is true ─────────────────────────────────────────────────\npm.test(\"authenticated is true\", function () {\n    pm.expect(res.authenticated, \"authenticated must be boolean true\").to.be.true;\n});\n\n// ─── 4. Response JSON schema matches actual API response structure ─────────────\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"authenticated\", \"token\", \"issuedAt\", \"expiresAt\"],\n        properties: {\n            authenticated: { type: \"boolean\" },\n            token:         { type: \"string\"  },\n            issuedAt:      { type: \"number\"  },\n            expiresAt:     { type: \"number\"  }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});\n\n// ─── 5. token is a non-empty string ───────────────────────────────────────────\npm.test(\"token is a non-empty string\", function () {\n    pm.expect(res.token, \"token must exist\").to.not.be.undefined;\n    pm.expect(res.token, \"token must be a string\").to.be.a(\"string\");\n    pm.expect(res.token.trim().length, \"token must not be empty\").to.be.above(0);\n});\n\n// ─── 6. issuedAt and expiresAt are positive numbers; expiresAt > issuedAt ─────\npm.test(\"issuedAt is a positive number\", function () {\n    pm.expect(res.issuedAt, \"issuedAt must be a number\").to.be.a(\"number\");\n    pm.expect(res.issuedAt, \"issuedAt must be positive\").to.be.above(0);\n});\n\npm.test(\"expiresAt is a positive number greater than issuedAt\", function () {\n    pm.expect(res.expiresAt, \"expiresAt must be a number\").to.be.a(\"number\");\n    pm.expect(res.expiresAt, \"expiresAt must be positive\").to.be.above(0);\n    pm.expect(\n        res.expiresAt,\n        `expiresAt (${res.expiresAt}) must be later than issuedAt (${res.issuedAt})`\n    ).to.be.above(res.issuedAt);\n});\n\n// ─── 7. Plaintext password is not exposed in the response ─────────────────────\npm.test(\"Plaintext password is not exposed in the response\", function () {\n    const plainPassword = pm.environment.get(\"candidatePassword\");\n    const bodyStr = pm.response.text();\n    pm.expect(\n        bodyStr.includes(plainPassword),\n        \"Plaintext password must not appear anywhere in the response body\"\n    ).to.be.false;\n});\n\n// ─── 8. Save candidateToken only after all critical checks pass ───────────────\npm.test(\"candidateToken saved to environment after successful auth and valid token\", function () {\n    pm.expect(res.authenticated, \"Cannot save token — authenticated is not true\").to.be.true;\n    pm.expect(res.token, \"Cannot save token — token is missing or empty\")\n        .to.be.a(\"string\").and.have.length.above(0);\n\n    pm.environment.set(\"candidateToken\", res.token);\n    pm.expect(\n        pm.environment.get(\"candidateToken\"),\n        \"candidateToken env var must match the token in the response\"\n    ).to.eql(res.token);\n});"
             ]
           }
         }
       ],
       "request": {
+        "auth": {
+          "type": "bearer"
+        },
         "method": "POST",
         "header": [],
         "body": {
@@ -98,7 +101,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "var recruiterToken =\npm.response.json().token;\npm.environment.set(\"recruiterToken\",recruiterToken);\n\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"authenticated\", \"token\", \"issuedAt\", \"expiresAt\"],\n        properties: {\n            authenticated: { type: \"boolean\" },\n            token: { type: \"string\" },\n            issuedAt: { type: \"number\" },\n            expiresAt: { type: \"number\" }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});"
+              "// ─── Parse response once ──────────────────────────────────────────────────────\nconst res = pm.response.json();\n\n// ─── 1. HTTP 200 OK ───────────────────────────────────────────────────────────\npm.test(\"Status code is 200 OK\", function () {\n    pm.response.to.have.status(200);\n});\n\n// ─── 2. Content-Type is JSON ──────────────────────────────────────────────────\npm.test(\"Content-Type header is application/json\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\"),\n        \"Expected Content-Type to contain 'application/json'\"\n    ).to.include(\"application/json\");\n});\n\n// ─── 3. authenticated is true ─────────────────────────────────────────────────\npm.test(\"authenticated is true\", function () {\n    pm.expect(res.authenticated, \"authenticated must be boolean true\").to.be.true;\n});\n\n// ─── 4. Response JSON schema matches actual API response structure ─────────────\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"authenticated\", \"token\", \"issuedAt\", \"expiresAt\"],\n        properties: {\n            authenticated: { type: \"boolean\" },\n            token:         { type: \"string\"  },\n            issuedAt:      { type: \"number\"  },\n            expiresAt:     { type: \"number\"  }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});\n\n// ─── 5. token is a non-empty string ───────────────────────────────────────────\npm.test(\"token is a non-empty string\", function () {\n    pm.expect(res.token, \"token must exist\").to.not.be.undefined;\n    pm.expect(res.token, \"token must be a string\").to.be.a(\"string\");\n    pm.expect(res.token.trim().length, \"token must not be empty\").to.be.above(0);\n});\n\n// ─── 6. issuedAt is a positive number ─────────────────────────────────────────\npm.test(\"issuedAt is a positive number\", function () {\n    pm.expect(res.issuedAt, \"issuedAt must be a number\").to.be.a(\"number\");\n    pm.expect(res.issuedAt, \"issuedAt must be positive\").to.be.above(0);\n});\n\n// ─── 7. expiresAt is a positive number greater than issuedAt ──────────────────\npm.test(\"expiresAt is a positive number greater than issuedAt\", function () {\n    pm.expect(res.expiresAt, \"expiresAt must be a number\").to.be.a(\"number\");\n    pm.expect(res.expiresAt, \"expiresAt must be positive\").to.be.above(0);\n    pm.expect(\n        res.expiresAt,\n        `expiresAt (${res.expiresAt}) must be later than issuedAt (${res.issuedAt})`\n    ).to.be.above(res.issuedAt);\n});\n\n// ─── 8. Plaintext password is not exposed in the response ─────────────────────\npm.test(\"Plaintext password is not exposed in the response\", function () {\n    const bodyStr = pm.response.text();\n    // NOTE: password is a static literal in this request, not stored in env\n    pm.expect(bodyStr.includes(pm.environment.get(\"recruiterPassword\")),\n        \"Plaintext password must not appear in the response body\"\n    ).to.be.false;\n});\n\n// ─── 9. Save recruiterToken only after successful auth and valid token ─────────\npm.test(\"recruiterToken saved to environment after successful auth and valid token\", function () {\n    pm.expect(res.authenticated, \"Cannot save token — authenticated is not true\").to.be.true;\n    pm.expect(res.token, \"Cannot save token — token is missing or empty\")\n        .to.be.a(\"string\").and.have.length.above(0);\n\n    pm.environment.set(\"recruiterToken\", res.token);\n    pm.expect(\n        pm.environment.get(\"recruiterToken\"),\n        \"recruiterToken env var must match the token in the response\"\n    ).to.eql(res.token);\n});"
             ]
           }
         }
@@ -108,7 +111,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\"email\": \"student@example.com\",\n\"password\": \"welcome\"\n}",
+          "raw": "{\n  \"email\": \"{{recruiterEmail}}\",\n  \"password\": \"{{recruiterPassword}}\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -135,7 +138,89 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.environment.set(\"positionId\", pm.response.json().id);\n\npm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"Response has position id\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"id\");\n});"
+              "// ─── Parse response & request body once ───────────────────────────────────────",
+              "const res     = pm.response.json();",
+              "const reqBody = JSON.parse(pm.request.body.raw);",
+              "",
+              "// ─── 1. HTTP 201 Created ───────────────────────────────────────────────────────",
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// ─── 2. Content-Type is JSON ───────────────────────────────────────────────────",
+              "pm.test(\"Content-Type header is application/json\", function () {",
+              "    pm.expect(",
+              "        pm.response.headers.get(\"Content-Type\"),",
+              "        \"Expected Content-Type to contain 'application/json'\"",
+              "    ).to.include(\"application/json\");",
+              "});",
+              "",
+              "// ─── 3. Response body is a non-null object ────────────────────────────────────",
+              "pm.test(\"Response body is a non-null object\", function () {",
+              "    pm.expect(res).to.be.an(\"object\").and.not.be.null;",
+              "    pm.expect(Array.isArray(res), \"Response must not be an array\").to.be.false;",
+              "});",
+              "",
+              "// ─── 4. Response JSON schema matches actual API response structure ─────────────",
+              "pm.test(\"Response schema is valid\", function () {",
+              "    const schema = {",
+              "        type: \"object\",",
+              "        required: [\"id\", \"title\", \"address\", \"city\", \"state\", \"zip\", \"description\", \"dateOpen\", \"company\"],",
+              "        properties: {",
+              "            id:          { type: \"number\"  },",
+              "            title:       { type: \"string\"  },",
+              "            address:     { type: \"string\"  },",
+              "            city:        { type: \"string\"  },",
+              "            state:       { type: \"string\"  },",
+              "            zip:         { type: \"string\"  },",
+              "            description: { type: \"string\"  },",
+              "            dateOpen:    { type: \"string\"  },",
+              "            company:     { type: \"string\"  }",
+              "        },",
+              "        additionalProperties: false",
+              "    };",
+              "    pm.response.to.have.jsonSchema(schema);",
+              "});",
+              "",
+              "// ─── 5. Position ID is a valid positive integer ───────────────────────────────",
+              "pm.test(\"Response contains a valid positive integer position ID\", function () {",
+              "    pm.expect(res.id, \"id field must exist\").to.not.be.undefined;",
+              "    pm.expect(res.id, \"id must be a number\").to.be.a(\"number\");",
+              "    pm.expect(res.id, \"id must be a positive integer\").to.be.above(0);",
+              "    pm.expect(Number.isInteger(res.id), \"id must be an integer, not a float\").to.be.true;",
+              "});",
+              "",
+              "// ─── 6. title matches request body ────────────────────────────────────────────",
+              "pm.test(\"Response title matches request body\", function () {",
+              "    pm.expect(res.title, `Expected title '${reqBody.title}' but got '${res.title}'`).to.eql(reqBody.title);",
+              "});",
+              "",
+              "// ─── 7. company matches request body ──────────────────────────────────────────",
+              "pm.test(\"Response company matches request body\", function () {",
+              "    pm.expect(res.company, `Expected company '${reqBody.company}' but got '${res.company}'`).to.eql(reqBody.company);",
+              "});",
+              "",
+              "// ─── 8. dateOpen matches request body ─────────────────────────────────────────",
+              "pm.test(\"Response dateOpen matches request body\", function () {",
+              "    pm.expect(res.dateOpen, `Expected dateOpen '${reqBody.dateOpen}' but got '${res.dateOpen}'`).to.eql(reqBody.dateOpen);",
+              "});",
+              "",
+              "// ─── 9. address matches request body ──────────────────────────────────────────",
+              "pm.test(\"Response address matches request body\", function () {",
+              "    pm.expect(res.address, `Expected address '${reqBody.address}' but got '${res.address}'`).to.eql(reqBody.address);",
+              "});",
+              "",
+              "// ─── 10. Save positionId only after validating a positive integer ID ───────────",
+              "pm.test(\"positionId saved to environment after validating ID\", function () {",
+              "    pm.expect(res.id, \"Cannot save positionId — id is missing\").to.not.be.undefined;",
+              "    pm.expect(res.id, \"Cannot save positionId — id must be a positive number\").to.be.a(\"number\").and.above(0);",
+              "",
+              "    pm.environment.set(\"positionId\", res.id);",
+              "    pm.expect(",
+              "        pm.environment.get(\"positionId\"),",
+              "        \"positionId env var must match the id in the response\"",
+              "    ).to.eql(res.id);",
+              "});"
             ]
           }
         }
@@ -182,7 +267,86 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.environment.set(\"applicationid\", pm.response.json().id);\n\npm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"Response has application id\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"id\");\n});"
+              "// ─── Parse response & request body once ───────────────────────────────────────",
+              "const res     = pm.response.json();",
+              "const reqBody = JSON.parse(pm.request.body.raw);",
+              "",
+              "// ─── 1. HTTP 201 Created ───────────────────────────────────────────────────────",
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// ─── 2. Content-Type is JSON ───────────────────────────────────────────────────",
+              "pm.test(\"Content-Type header is application/json\", function () {",
+              "    pm.expect(",
+              "        pm.response.headers.get(\"Content-Type\"),",
+              "        \"Expected Content-Type to contain 'application/json'\"",
+              "    ).to.include(\"application/json\");",
+              "});",
+              "",
+              "// ─── 3. Response body is a non-null object ────────────────────────────────────",
+              "pm.test(\"Response body is a non-null object\", function () {",
+              "    pm.expect(res).to.be.an(\"object\").and.not.be.null;",
+              "    pm.expect(Array.isArray(res), \"Response must not be an array\").to.be.false;",
+              "});",
+              "",
+              "// ─── 4. Response JSON schema matches actual API response structure ─────────────",
+              "pm.test(\"Response schema is valid\", function () {",
+              "    const schema = {",
+              "        type: \"object\",",
+              "        required: [\"id\", \"candidateId\", \"positionId\", \"dateApplied\"],",
+              "        properties: {",
+              "            id:          { type: \"number\" },",
+              "            candidateId: { type: \"number\" },",
+              "            positionId:  { type: \"number\" },",
+              "            dateApplied: { type: \"string\" }",
+              "        },",
+              "        additionalProperties: false",
+              "    };",
+              "    pm.response.to.have.jsonSchema(schema);",
+              "});",
+              "",
+              "// ─── 5. Application ID is a valid positive integer ────────────────────────────",
+              "pm.test(\"Response contains a valid positive integer application ID\", function () {",
+              "    pm.expect(res.id, \"id field must exist\").to.not.be.undefined;",
+              "    pm.expect(res.id, \"id must be a number\").to.be.a(\"number\");",
+              "    pm.expect(res.id, \"id must be a positive integer\").to.be.above(0);",
+              "    pm.expect(Number.isInteger(res.id), \"id must be an integer, not a float\").to.be.true;",
+              "});",
+              "",
+              "// ─── 6. candidateId matches request body ──────────────────────────────────────",
+              "pm.test(\"Response candidateId matches request body\", function () {",
+              "    pm.expect(res.candidateId,",
+              "        `Expected candidateId ${reqBody.candidateId} but got ${res.candidateId}`",
+              "    ).to.eql(reqBody.candidateId);",
+              "});",
+              "",
+              "// ─── 7. positionId matches request body ───────────────────────────────────────",
+              "pm.test(\"Response positionId matches request body\", function () {",
+              "    pm.expect(res.positionId,",
+              "        `Expected positionId ${reqBody.positionId} but got ${res.positionId}`",
+              "    ).to.eql(reqBody.positionId);",
+              "});",
+              "",
+              "// ─── 8. dateApplied matches request body ──────────────────────────────────────",
+              "pm.test(\"Response dateApplied matches request body\", function () {",
+              "    pm.expect(res.dateApplied,",
+              "        `Expected dateApplied '${reqBody.dateApplied}' but got '${res.dateApplied}'`",
+              "    ).to.eql(reqBody.dateApplied);",
+              "});",
+              "",
+              "// ─── 9. Save applicationid only after validating a positive integer ID ─────────",
+              "pm.test(\"applicationid saved to environment after validating ID\", function () {",
+              "    pm.expect(res.id, \"Cannot save applicationid — id is missing\").to.not.be.undefined;",
+              "    pm.expect(res.id, \"Cannot save applicationid — id must be a positive number\")",
+              "        .to.be.a(\"number\").and.above(0);",
+              "",
+              "    pm.environment.set(\"applicationid\", res.id);",
+              "    pm.expect(",
+              "        pm.environment.get(\"applicationid\"),",
+              "        \"applicationid env var must match the id in the response\"",
+              "    ).to.eql(res.id);",
+              "});"
             ]
           }
         }
@@ -229,7 +393,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response has position id\", function () {\n    var jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"id\");\n});"
+              "// ─── Parse response & request body once ───────────────────────────────────────\nconst res     = pm.response.json();\nconst reqBody = JSON.parse(pm.request.body.raw);\n\n// ─── 1. HTTP 200 OK ───────────────────────────────────────────────────────────\npm.test(\"Status code is 200 OK\", function () {\n    pm.response.to.have.status(200);\n});\n\n// ─── 2. Content-Type is JSON ──────────────────────────────────────────────────\npm.test(\"Content-Type header is application/json\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\"),\n        \"Expected Content-Type to contain 'application/json'\"\n    ).to.include(\"application/json\");\n});\n\n// ─── 3. Response body is a non-null object ────────────────────────────────────\npm.test(\"Response body is a non-null object\", function () {\n    pm.expect(res).to.be.an(\"object\").and.not.be.null;\n    pm.expect(Array.isArray(res), \"Response must not be an array\").to.be.false;\n});\n\n// ─── 4. Response JSON schema matches actual API response structure ─────────────\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"id\", \"title\", \"address\", \"city\", \"state\", \"zip\", \"description\", \"dateOpen\", \"company\"],\n        properties: {\n            id:          { type: \"number\" },\n            title:       { type: \"string\" },\n            address:     { type: \"string\" },\n            city:        { type: \"string\" },\n            state:       { type: \"string\" },\n            zip:         { type: \"string\" },\n            description: { type: \"string\" },\n            dateOpen:    { type: \"string\" },\n            company:     { type: \"string\" }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});\n\n// ─── 5. Position ID is a valid positive integer ───────────────────────────────\npm.test(\"Response contains a valid positive integer position ID\", function () {\n    pm.expect(res.id, \"id field must exist\").to.not.be.undefined;\n    pm.expect(res.id, \"id must be a number\").to.be.a(\"number\");\n    pm.expect(res.id, \"id must be a positive integer\").to.be.above(0);\n    pm.expect(Number.isInteger(res.id), \"id must be an integer, not a float\").to.be.true;\n});\n\n// ─── 6. Returned ID matches the saved positionId environment variable ──────────\npm.test(\"Returned position ID matches saved positionId environment variable\", function () {\n    const savedId = pm.environment.get(\"positionId\");\n    pm.expect(savedId, \"positionId env var must be set before running this request\").to.not.be.undefined;\n    pm.expect(res.id,\n        `Response id (${res.id}) must match positionId env var (${savedId})`\n    ).to.eql(savedId);\n});\n\n// ─── 7. title reflects the updated value from request body ────────────────────\npm.test(\"Response title matches updated request body\", function () {\n    pm.expect(res.title,\n        `Expected title '${reqBody.title}' but got '${res.title}'`\n    ).to.eql(reqBody.title);\n});\n\n// ─── 8. company matches request body ──────────────────────────────────────────\npm.test(\"Response company matches request body\", function () {\n    pm.expect(res.company,\n        `Expected company '${reqBody.company}' but got '${res.company}'`\n    ).to.eql(reqBody.company);\n});\n\n// ─── 9. dateOpen matches request body ─────────────────────────────────────────\npm.test(\"Response dateOpen matches request body\", function () {\n    pm.expect(res.dateOpen,\n        `Expected dateOpen '${reqBody.dateOpen}' but got '${res.dateOpen}'`\n    ).to.eql(reqBody.dateOpen);\n});\n\n// ─── 10. address matches request body ─────────────────────────────────────────\npm.test(\"Response address matches request body\", function () {\n    pm.expect(res.address,\n        `Expected address '${reqBody.address}' but got '${res.address}'`\n    ).to.eql(reqBody.address);\n});\n\n// ─── 11. Save expected updated fields for GET Position by ID verification ──────\n// Only saved when HTTP 200 is confirmed and all four field validations pass.\npm.test(\"Expected position fields saved to environment for GET verification\", function () {\n    pm.expect(pm.response.code, \"HTTP 200 required before saving env vars\").to.eql(200);\n    pm.expect(res.title,   \"title must match request body before saving\").to.eql(reqBody.title);\n    pm.expect(res.company, \"company must match request body before saving\").to.eql(reqBody.company);\n    pm.expect(res.address, \"address must match request body before saving\").to.eql(reqBody.address);\n    pm.expect(res.dateOpen,\"dateOpen must match request body before saving\").to.eql(reqBody.dateOpen);\n\n    pm.environment.set(\"expectedPositionTitle\",   reqBody.title);\n    pm.environment.set(\"expectedPositionCompany\", reqBody.company);\n    pm.environment.set(\"expectedPositionAddress\", reqBody.address);\n    pm.environment.set(\"expectedPositionDateOpen\",reqBody.dateOpen);\n});"
             ]
           }
         }
@@ -270,6 +434,54 @@
       "response": []
     },
     {
+      "name": "get position by Id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// ─── Parse response once ──────────────────────────────────────────────────────\nconst res = pm.response.json();\n\n// ─── 1. HTTP 200 OK ───────────────────────────────────────────────────────────\npm.test(\"Status code is 200 OK\", function () {\n    pm.response.to.have.status(200);\n});\n\n// ─── 2. Content-Type is JSON ──────────────────────────────────────────────────\npm.test(\"Content-Type header is application/json\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\"),\n        \"Expected Content-Type to contain 'application/json'\"\n    ).to.include(\"application/json\");\n});\n\n// ─── 3. Response body is a non-null object ────────────────────────────────────\npm.test(\"Response body is a non-null object\", function () {\n    pm.expect(res).to.be.an(\"object\").and.not.be.null;\n    pm.expect(Array.isArray(res), \"Response must not be an array\").to.be.false;\n});\n\n// ─── 4. Response JSON schema matches actual API response structure ─────────────\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"id\", \"title\", \"address\", \"city\", \"state\", \"zip\", \"description\", \"dateOpen\", \"company\", \"candidatesCount\"],\n        properties: {\n            id:              { type: \"number\" },\n            title:           { type: \"string\" },\n            address:         { type: \"string\" },\n            city:            { type: \"string\" },\n            state:           { type: \"string\" },\n            zip:             { type: \"string\" },\n            description:     { type: \"string\" },\n            dateOpen:        { type: \"string\" },\n            company:         { type: \"string\" },\n            candidatesCount: { type: \"number\" }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});\n\n// ─── 5. Position ID is a valid positive integer ───────────────────────────────\npm.test(\"Response contains a valid positive integer position ID\", function () {\n    pm.expect(res.id, \"id field must exist\").to.not.be.undefined;\n    pm.expect(res.id, \"id must be a number\").to.be.a(\"number\");\n    pm.expect(res.id, \"id must be a positive integer\").to.be.above(0);\n    pm.expect(Number.isInteger(res.id), \"id must be an integer, not a float\").to.be.true;\n});\n\n// ─── 6. Returned ID matches the saved positionId environment variable ──────────\npm.test(\"Returned position ID matches saved positionId environment variable\", function () {\n    const savedId = pm.environment.get(\"positionId\");\n    pm.expect(savedId, \"positionId env var must be set before running this request\").to.not.be.undefined;\n    pm.expect(res.id,\n        `Response id (${res.id}) must match positionId env var (${savedId})`\n    ).to.eql(savedId);\n});\n\n// ─── Read expected field values saved by Update Position ──────────────────────\nconst expectedTitle    = pm.environment.get(\"expectedPositionTitle\");\nconst expectedCompany  = pm.environment.get(\"expectedPositionCompany\");\nconst expectedAddress  = pm.environment.get(\"expectedPositionAddress\");\nconst expectedDateOpen = pm.environment.get(\"expectedPositionDateOpen\");\n\n// ─── 7. title matches value saved by Update Position ──────────────────────────\npm.test(\"title matches expectedPositionTitle set by Update Position\", function () {\n    pm.expect(expectedTitle,\n        \"expectedPositionTitle env var is missing — run Update Position first\"\n    ).to.be.a(\"string\").and.have.length.above(0);\n    pm.expect(res.title,\n        `Expected title '${expectedTitle}' but got '${res.title}'`\n    ).to.eql(expectedTitle);\n});\n\n// ─── 8. company matches value saved by Update Position ────────────────────────\npm.test(\"company matches expectedPositionCompany set by Update Position\", function () {\n    pm.expect(expectedCompany,\n        \"expectedPositionCompany env var is missing — run Update Position first\"\n    ).to.be.a(\"string\").and.have.length.above(0);\n    pm.expect(res.company,\n        `Expected company '${expectedCompany}' but got '${res.company}'`\n    ).to.eql(expectedCompany);\n});\n\n// ─── 9. address matches value saved by Update Position ────────────────────────\npm.test(\"address matches expectedPositionAddress set by Update Position\", function () {\n    pm.expect(expectedAddress,\n        \"expectedPositionAddress env var is missing — run Update Position first\"\n    ).to.be.a(\"string\").and.have.length.above(0);\n    pm.expect(res.address,\n        `Expected address '${expectedAddress}' but got '${res.address}'`\n    ).to.eql(expectedAddress);\n});\n\n// ─── 10. dateOpen matches value saved by Update Position ──────────────────────\npm.test(\"dateOpen matches expectedPositionDateOpen set by Update Position\", function () {\n    pm.expect(expectedDateOpen,\n        \"expectedPositionDateOpen env var is missing — run Update Position first\"\n    ).to.be.a(\"string\").and.have.length.above(0);\n    pm.expect(res.dateOpen,\n        `Expected dateOpen '${expectedDateOpen}' but got '${res.dateOpen}'`\n    ).to.eql(expectedDateOpen);\n});\n\n// ─── 11. candidatesCount is a non-negative integer ────────────────────────────\npm.test(\"candidatesCount is a non-negative integer\", function () {\n    pm.expect(res.candidatesCount, \"candidatesCount must be a number\").to.be.a(\"number\");\n    pm.expect(res.candidatesCount, \"candidatesCount must be >= 0\").to.be.at.least(0);\n    pm.expect(\n        Number.isInteger(res.candidatesCount),\n        \"candidatesCount must be an integer, not a float\"\n    ).to.be.true;\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{recruiterToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Artem's test position\",\n  \"address\": \"123 Main St\",\n  \"city\": \"\",\n  \"state\": \"\",\n  \"zip\": \"00000\",\n  \"description\": \"\",\n  \"dateOpen\": \"2026-10-22\",\n  \"company\": \"Portnov School\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/positions/{{positionId}}",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "positions",
+            "{{positionId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "delete application",
       "event": [
         {
@@ -277,7 +489,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 204\", function () {\n    pm.response.to.have.status(204);\n});\n\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.be.empty;\n});"
+              "// ─── 1. HTTP 204 No Content ───────────────────────────────────────────────────\npm.test(\"Status code is 204 No Content\", function () {\n    pm.response.to.have.status(204);\n});\n\n// ─── 2. Response body is empty ────────────────────────────────────────────────\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.be.empty;\n});\n\n// ─── 3. Verify applicationid was set before this request ran ──────────────────\npm.test(\"applicationid env var was set before deletion\", function () {\n    const appId = pm.environment.get(\"applicationid\");\n    pm.expect(appId,\n        \"applicationid env var must be set — run New Application before Delete Application\"\n    ).to.not.be.undefined;\n    pm.expect(appId, \"applicationid must not be empty\").to.not.eql(\"\");\n});\n\n// ─── 4. Clear applicationid after confirmed 204 + empty body ──────────────────\npm.test(\"applicationid removed from environment after successful deletion\", function () {\n    pm.expect(pm.response.code, \"HTTP 204 required before clearing applicationid\").to.eql(204);\n    pm.expect(pm.response.text(), \"Empty body required before clearing applicationid\").to.be.empty;\n\n    pm.environment.unset(\"applicationid\");\n    pm.expect(\n        pm.environment.get(\"applicationid\"),\n        \"applicationid must be cleared from environment after deletion\"\n    ).to.be.undefined;\n});"
             ]
           }
         }
@@ -309,6 +521,166 @@
       "response": []
     },
     {
+      "name": "verify positiive",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// ─── Parse response once ──────────────────────────────────────────────────────\nconst res = pm.response.json();\n\n// ─── 1. HTTP 200 OK ───────────────────────────────────────────────────────────\npm.test(\"Status code is 200 OK\", function () {\n    pm.response.to.have.status(200);\n});\n\n// ─── 2. Content-Type is JSON ──────────────────────────────────────────────────\npm.test(\"Content-Type header is application/json\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\"),\n        \"Expected Content-Type to contain 'application/json'\"\n    ).to.include(\"application/json\");\n});\n\n// ─── 3. Response body is a non-null object ────────────────────────────────────\npm.test(\"Response body is a non-null object\", function () {\n    pm.expect(res).to.be.an(\"object\").and.not.be.null;\n    pm.expect(Array.isArray(res), \"Response must not be an array\").to.be.false;\n});\n\n// ─── 4. Response JSON schema matches actual API response structure ─────────────\n// NOTE: 'role' is null in the actual response — schema allows null via type array.\n// 'password' is correctly absent from this endpoint's response.\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\n            \"id\", \"email\", \"firstName\", \"middleName\", \"lastName\",\n            \"address\", \"city\", \"state\", \"zip\", \"summary\",\n            \"role\", \"token\", \"issuedAt\", \"expiresAt\"\n        ],\n        properties: {\n            id:         { type: \"number\"           },\n            email:      { type: \"string\"           },\n            firstName:  { type: \"string\"           },\n            middleName: { type: \"string\"           },\n            lastName:   { type: \"string\"           },\n            address:    { type: \"string\"           },\n            city:       { type: \"string\"           },\n            state:      { type: \"string\"           },\n            zip:        { type: \"string\"           },\n            summary:    { type: \"string\"           },\n            role:       { type: [\"string\", \"null\"] },\n            token:      { type: \"string\"           },\n            issuedAt:   { type: \"number\"           },\n            expiresAt:  { type: \"number\"           }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});\n\n// ─── 5. Candidate ID is a valid positive integer ──────────────────────────────\npm.test(\"Response contains a valid positive integer candidate ID\", function () {\n    pm.expect(res.id, \"id must exist\").to.not.be.undefined;\n    pm.expect(res.id, \"id must be a number\").to.be.a(\"number\");\n    pm.expect(res.id, \"id must be a positive integer\").to.be.above(0);\n    pm.expect(Number.isInteger(res.id), \"id must be an integer, not a float\").to.be.true;\n});\n\n// ─── 6. Returned ID matches saved candidateId environment variable ─────────────\npm.test(\"Returned candidate ID matches saved candidateId environment variable\", function () {\n    const savedId = pm.environment.get(\"candidateId\");\n    pm.expect(savedId,\n        \"candidateId env var must be set — run Register new Candidate first\"\n    ).to.not.be.undefined;\n    pm.expect(res.id,\n        `Response id (${res.id}) must match candidateId env var (${savedId})`\n    ).to.eql(savedId);\n});\n\n// ─── 7. Returned email matches saved email environment variable ───────────────\npm.test(\"Returned email matches saved email environment variable\", function () {\n    const savedEmail = pm.environment.get(\"email\");\n    pm.expect(savedEmail,\n        \"email env var must be set — run Register new Candidate first\"\n    ).to.be.a(\"string\").and.have.length.above(0);\n    pm.expect(res.email,\n        `Response email '${res.email}' must match email env var '${savedEmail}'`\n    ).to.eql(savedEmail);\n});\n\n// ─── 8. firstName is a non-empty string ───────────────────────────────────────\npm.test(\"firstName is a non-empty string\", function () {\n    pm.expect(res.firstName, \"firstName must be a string\").to.be.a(\"string\");\n    pm.expect(res.firstName.trim().length, \"firstName must not be empty\").to.be.above(0);\n});\n\n// ─── 9. lastName is a non-empty string ────────────────────────────────────────\npm.test(\"lastName is a non-empty string\", function () {\n    pm.expect(res.lastName, \"lastName must be a string\").to.be.a(\"string\");\n    pm.expect(res.lastName.trim().length, \"lastName must not be empty\").to.be.above(0);\n});\n\n// ─── 10. middleName is present and is a string (may be empty) ─────────────────\npm.test(\"middleName is present and is a string\", function () {\n    pm.expect(res.middleName, \"middleName must exist\").to.not.be.undefined;\n    pm.expect(res.middleName, \"middleName must be a string\").to.be.a(\"string\");\n});\n\n// ─── 11. token is a non-empty string (not logged) ─────────────────────────────\npm.test(\"token is a non-empty string\", function () {\n    pm.expect(res.token, \"token must be a string\").to.be.a(\"string\");\n    pm.expect(res.token.trim().length, \"token must not be empty\").to.be.above(0);\n});\n\n// ─── 12. issuedAt and expiresAt are positive; expiresAt is later ──────────────\npm.test(\"issuedAt is a positive number\", function () {\n    pm.expect(res.issuedAt, \"issuedAt must be a number\").to.be.a(\"number\");\n    pm.expect(res.issuedAt, \"issuedAt must be positive\").to.be.above(0);\n});\n\npm.test(\"expiresAt is a positive number greater than issuedAt\", function () {\n    pm.expect(res.expiresAt, \"expiresAt must be a number\").to.be.a(\"number\");\n    pm.expect(res.expiresAt, \"expiresAt must be positive\").to.be.above(0);\n    pm.expect(res.expiresAt,\n        `expiresAt (${res.expiresAt}) must be later than issuedAt (${res.issuedAt})`\n    ).to.be.above(res.issuedAt);\n});\n\n// ─── 13. Password is not exposed in the response ──────────────────────────────\npm.test(\"Plaintext password is not exposed in the response\", function () {\n    const plainPassword = pm.environment.get(\"candidatePassword\");\n    const bodyStr = pm.response.text();\n    pm.expect(bodyStr.includes(plainPassword),\n        \"Plaintext password must not appear in the response body\"\n    ).to.be.false;\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{candidateToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/verify",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "verify"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "candidate logout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// ─── Parse response once ──────────────────────────────────────────────────────\nconst res = pm.response.json();\n\n// ─── 1. HTTP 200 OK ───────────────────────────────────────────────────────────\npm.test(\"Status code is 200 OK\", function () {\n    pm.response.to.have.status(200);\n});\n\n// ─── 2. Content-Type is JSON ──────────────────────────────────────────────────\npm.test(\"Content-Type header is application/json\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\"),\n        \"Expected Content-Type to contain 'application/json'\"\n    ).to.include(\"application/json\");\n});\n\n// ─── 3. Response body is a non-null object ────────────────────────────────────\npm.test(\"Response body is a non-null object\", function () {\n    pm.expect(res).to.be.an(\"object\").and.not.be.null;\n    pm.expect(Array.isArray(res), \"Response must not be an array\").to.be.false;\n});\n\n// ─── 4. Response JSON schema matches actual API response structure ─────────────\n// NOTE: token is null on logout — the API explicitly invalidates it.\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"authenticated\", \"token\"],\n        properties: {\n            authenticated: { type: \"boolean\"        },\n            token:         { type: [\"string\", \"null\"] }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});\n\n// ─── 5. authenticated is false after logout ───────────────────────────────────\npm.test(\"authenticated is false after logout\", function () {\n    pm.expect(res.authenticated,\n        \"authenticated must be false — a successful logout must invalidate the session\"\n    ).to.be.false;\n});\n\n// ─── 6. token is null after logout ────────────────────────────────────────────\npm.test(\"token is null after logout\", function () {\n    pm.expect(res.token,\n        \"token must be null — the API must not return an active token after logout\"\n    ).to.be.null;\n});\n\n// ─── 7. Clear candidateToken after confirmed successful logout ────────────────\npm.test(\"candidateToken removed from environment after successful logout\", function () {\n    pm.expect(pm.response.code, \"HTTP 200 required before clearing candidateToken\").to.eql(200);\n    pm.expect(res.authenticated, \"authenticated must be false before clearing candidateToken\").to.be.false;\n\n    pm.environment.unset(\"candidateToken\");\n    pm.expect(\n        pm.environment.get(\"candidateToken\"),\n        \"candidateToken must be cleared from environment after logout\"\n    ).to.be.undefined;\n});"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\nconst token = pm.environment.get(\"candidateToken\");\n\nif (!token) {\n    throw new Error(\"candidateToken is missing. Run Candidate Login first.\");\n}\n\npm.environment.set(\"tokenBeforeLogout\", token);\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{candidateToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/logout",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "logout"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "verify negative",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\nconst res = pm.response.json();\n\n// 1. Ensure the previous token was saved\npm.test(\"Previous candidate token is available\", function () {\n    const oldToken = pm.environment.get(\"tokenBeforeLogout\");\n    pm.expect(oldToken, \"Run Candidate Logout first\")\n        .to.be.a(\"string\").and.not.empty;\n});\n\n// 2. Old token should be rejected\npm.test(\"Status code is 401 Unauthorized\", function () {\n    pm.response.to.have.status(401);\n});\n\n// 3. Response is JSON\npm.test(\"Content-Type is application/json\", function () {\n    pm.expect(pm.response.headers.get(\"Content-Type\"))\n        .to.include(\"application/json\");\n});\n\n// 4. Candidate is not authenticated\npm.test(\"authenticated is false\", function () {\n    pm.expect(res.authenticated).to.be.false;\n});\n\n// 5. API reports an invalid token\npm.test(\"Error message is Invalid token\", function () {\n    pm.expect(res.message).to.eql(\"Invalid token.\");\n});\n\n// 6. Clean up the temporary token after verification\npm.test(\"Temporary token is cleared after successful verification\", function () {\n    pm.expect(pm.response.code).to.eql(401);\n    pm.expect(res.authenticated).to.be.false;\n    pm.expect(res.message).to.eql(\"Invalid token.\");\n\n    pm.environment.unset(\"tokenBeforeLogout\");\n    pm.expect(pm.environment.get(\"tokenBeforeLogout\"))\n        .to.be.undefined;\n});\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenBeforeLogout}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseURL}}/verify",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "verify"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "candidate login again",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// ─── Parse response once ──────────────────────────────────────────────────────\nconst res = pm.response.json();\n\n// ─── 1. HTTP 200 OK ───────────────────────────────────────────────────────────\npm.test(\"Status code is 200 OK\", function () {\n    pm.response.to.have.status(200);\n});\n\n// ─── 2. Content-Type is JSON ──────────────────────────────────────────────────\npm.test(\"Content-Type header is application/json\", function () {\n    pm.expect(\n        pm.response.headers.get(\"Content-Type\"),\n        \"Expected Content-Type to contain 'application/json'\"\n    ).to.include(\"application/json\");\n});\n\n// ─── 3. authenticated is true ─────────────────────────────────────────────────\npm.test(\"authenticated is true\", function () {\n    pm.expect(res.authenticated, \"authenticated must be boolean true\").to.be.true;\n});\n\n// ─── 4. Response JSON schema matches actual API response structure ─────────────\npm.test(\"Response schema is valid\", function () {\n    const schema = {\n        type: \"object\",\n        required: [\"authenticated\", \"token\", \"issuedAt\", \"expiresAt\"],\n        properties: {\n            authenticated: { type: \"boolean\" },\n            token:         { type: \"string\"  },\n            issuedAt:      { type: \"number\"  },\n            expiresAt:     { type: \"number\"  }\n        },\n        additionalProperties: false\n    };\n    pm.response.to.have.jsonSchema(schema);\n});\n\n// ─── 5. token is a non-empty string ───────────────────────────────────────────\npm.test(\"token is a non-empty string\", function () {\n    pm.expect(res.token, \"token must exist\").to.not.be.undefined;\n    pm.expect(res.token, \"token must be a string\").to.be.a(\"string\");\n    pm.expect(res.token.trim().length, \"token must not be empty\").to.be.above(0);\n});\n\n// ─── 6. issuedAt and expiresAt are positive numbers; expiresAt > issuedAt ─────\npm.test(\"issuedAt is a positive number\", function () {\n    pm.expect(res.issuedAt, \"issuedAt must be a number\").to.be.a(\"number\");\n    pm.expect(res.issuedAt, \"issuedAt must be positive\").to.be.above(0);\n});\n\npm.test(\"expiresAt is a positive number greater than issuedAt\", function () {\n    pm.expect(res.expiresAt, \"expiresAt must be a number\").to.be.a(\"number\");\n    pm.expect(res.expiresAt, \"expiresAt must be positive\").to.be.above(0);\n    pm.expect(\n        res.expiresAt,\n        `expiresAt (${res.expiresAt}) must be later than issuedAt (${res.issuedAt})`\n    ).to.be.above(res.issuedAt);\n});\n\n// ─── 7. Plaintext password is not exposed in the response ─────────────────────\npm.test(\"Plaintext password is not exposed in the response\", function () {\n    const plainPassword = pm.environment.get(\"candidatePassword\");\n    const bodyStr = pm.response.text();\n    pm.expect(\n        bodyStr.includes(plainPassword),\n        \"Plaintext password must not appear anywhere in the response body\"\n    ).to.be.false;\n});\n\n// ─── 8. Save candidateToken only after all critical checks pass ───────────────\npm.test(\"candidateToken saved to environment after successful auth and valid token\", function () {\n    pm.expect(res.authenticated, \"Cannot save token — authenticated is not true\").to.be.true;\n    pm.expect(res.token, \"Cannot save token — token is missing or empty\")\n        .to.be.a(\"string\").and.have.length.above(0);\n\n    pm.environment.set(\"candidateToken\", res.token);\n    pm.expect(\n        pm.environment.get(\"candidateToken\"),\n        \"candidateToken env var must match the token in the response\"\n    ).to.eql(res.token);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{email}}\",\n\"password\": \"{{candidatePassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseURL}}/login",
+          "host": [
+            "{{baseURL}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "delete candidate",
       "event": [
         {
@@ -316,7 +688,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status code is 204\", function () {\n    pm.response.to.have.status(204);\n});\n\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.be.empty;\n});"
+              "pm.test(\"Status code is 204\", function () {\n    pm.response.to.have.status(204);\n});\n\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.be.empty;\n});\n\npm.test(\"Status code is 204 No Content\", function () {\n    pm.response.to.have.status(204);\n});\n\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.be.empty;\n});\n\n\n\n"
             ]
           }
         }
@@ -348,83 +720,18 @@
       "response": []
     },
     {
-      "name": "candidate logout",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{candidateToken}}",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{baseURL}}/logout",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "logout"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "verify",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{candidateToken}}",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{baseURL}}/verify",
-          "host": [
-            "{{baseURL}}"
-          ],
-          "path": [
-            "verify"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
       "name": "delete position",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {\n    pm.response.to.have.status(204);\n});\n\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.be.empty;\n});"
+            ]
+          }
+        }
+      ],
       "request": {
         "auth": {
           "type": "bearer",
