@@ -1,33 +1,37 @@
 # Software QA Portfolio
 
 **Anara Ashmukhanbetova**  
-Manual QA • API Testing • SQL • Python • Playwright (in progress)
+**Manual Testing | REST API Testing | Postman Test Automation | Jira | SQL**
 
-This repository showcases hands-on software testing assignments and practical QA investigations. The reports describe what was tested, what was observed, and which evidence was collected.
+Hands-on software QA portfolio with transparent test evidence, reproducible defect documentation, and API checks. These are **training and project-based tests**, not claims of prior professional QA employment.
 
-## Featured Projects
+## Featured Work
 
-### 1. Manual UI Testing — Scientific Calculator
-- [Bug report: Calculator buttons unresponsive at specific viewport sizes](manual-testing/calculator/bug-report-01.md)
-- Includes steps to reproduce, expected and actual results, Chrome DevTools findings and three screenshots.
-- Skills: functional testing, responsive testing, defect reporting, HTML/CSS investigation.
+### 1. Recruitment API — End-to-End Automated Checks (Postman)
+- [Postman collection](api-testing/recruit-e2e-v2.postman_collection.json) — 14 linked API requests, dynamic IDs, authentication and cleanup.
+- **116 automated Postman checks passed; 0 failed** in the recorded Collection Runner execution (November 19, 2026).
+- [Sanitized test execution results](api-testing/recruit-e2e-v2-test-run-results.json), including request-level evidence.
+- Tools: Postman, JavaScript `pm.test()` / `pm.expect()`, REST, JSON and environment variables.
 
-### 2. API Testing — Postman
-- [API testing documentation](api-testing/REDME.md)
-- [Swagger Petstore collection](api-testing/swager-petstore.postman_collection.json)
-- [Recruit E2E collection](api-testing/recruit-e2e-v2.postman_collection.json)
-- [Petstore environment example](api-testing/petstore.postman_environment.json)
-- Skills: REST API requests, request parameters, authentication, environment variables, response checks and troubleshooting.
+### 2. Scientific Calculator — Manual UI Testing
+- [Manual test cases and observed results](manual-testing/calculator/test-cases.md) — two responsive viewport scenarios, both linked to recorded evidence.
+- [Bug report with screenshots](manual-testing/calculator/bug-report-01.md) — nonresponsive buttons investigated with Chrome DevTools and Safari Web Inspector.
+- **Scope:** Button failures were observed in Chrome; Safari was used for element inspection, not confirmed defect reproduction. Chrome version was not recorded; no fix retest claimed.
+
+### 3. Swagger Petstore — API Testing
+- [Postman collection](api-testing/swagger-petstore.postman_collection.json) and [environment example](api-testing/petstore.postman_environment.json).
+- Create/update/delete and image-upload exercises, including HTTP 404 and 415 investigations.
+- [API project documentation and run instructions](api-testing/README.md).
 
 ## Skills & Tools
 
-**Testing:** test case design, bug reporting, manual functional testing, API testing  
-**Tools:** Postman, Chrome DevTools, GitHub  
-**Data & programming:** SQL, Python  
-**Automation learning:** pytest, Playwright with Python
+- **Manual QA:** functional and responsive UI testing, writing and executing test cases, documenting defects, Jira coursework.
+- **API QA & automation:** Postman, REST requests, HTTP status codes, JSON validation, JavaScript-based automated Postman checks, Collection Runner.
+- **Investigation & data:** Chrome DevTools, Safari Web Inspector, HTML/CSS fundamentals, SQL, Git/GitHub.
+- **Currently learning:** Python, pytest, Playwright with Python, AI-assisted testing.
 
-## Next Portfolio Updates
+## What Is Not Yet Published
 
-SQL exercises, Python/pytest work and completed Playwright automation examples will be added as their existing assignments are reviewed and prepared for publication.
+A runnable Python/Playwright UI automation framework and standalone CI/CD workflow are **not yet** part of this public portfolio. The published automated checks are in Postman.
 
-> These are practice and training projects. The calculator report documents an observed defect; it does not claim that a fix was implemented or retested.
+> Evidence is limited to observed test executions and documented artifacts; unverified browser coverage or post-fix retests are not claimed.
