@@ -30,8 +30,10 @@ Training and project-based QA work with documented evidence. Projects include re
 - **Investigation & data:** Chrome DevTools, Safari Web Inspector, HTML/CSS fundamentals, SQL, Git/GitHub.
 - **Currently learning:** Python, pytest, Playwright with Python, AI-assisted testing.
 
-## What Is Not Yet Published
+## Test Automation — Ongoing Development
 
-A runnable Python/Playwright UI automation framework and standalone CI/CD workflow are **not yet** part of this public portfolio. The published automated checks are in Postman.
+**Already implemented:** Automated REST API checks in Postman, with a documented execution of 116 passing assertions.
+
+**In progress:** Python, pytest, and Playwright UI automation through coursework. Runnable UI tests and CI/CD examples will be published after they have been implemented and verified.
 
 > Evidence is limited to observed test executions and documented artifacts; unverified browser coverage or post-fix retests are not claimed.
