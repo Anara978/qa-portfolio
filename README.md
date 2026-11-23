@@ -1,9 +1,9 @@
 # Software QA Portfolio
 
 **Anara Ashmukhanbetova**  
-**Manual Testing | REST API Testing | Postman Test Automation | Jira | SQL**
+**Manual Testing | REST API Testing | Postman Test Automation | SQL**
 
-Hands-on software QA portfolio with transparent test evidence, reproducible defect documentation, and API checks. These are **training and project-based tests**, not claims of prior professional QA employment.
+Training and project-based QA work with documented evidence. Projects include reproducible manual tests, defect investigations, and automated REST API checks in Postman.
 
 ## Featured Work
 
