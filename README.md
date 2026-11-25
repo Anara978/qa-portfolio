@@ -23,6 +23,11 @@ Training and project-based QA work with documented evidence. Projects include re
 - Create/update/delete and image-upload exercises, including HTTP 404 and 415 investigations.
 - [API project documentation and run instructions](api-testing/README.md).
 
+### 4. SauceDemo — Python & Playwright UI Automation
+- [Project source, coverage and run instructions](playwright-python-saucedemo/README.md).
+- Positive and negative login, shopping cart verification, five locator strategies and two introductory exercises.
+- **5 pytest executions passed; 0 failed** on Chromium (November 25, 2026, original coursework run).
+
 ## Skills & Tools
 
 - **Manual QA:** functional and responsive UI testing, writing and executing test cases, documenting defects, Jira coursework.
@@ -34,6 +39,6 @@ Training and project-based QA work with documented evidence. Projects include re
 
 **Already implemented:** Automated REST API checks in Postman, with a documented execution of 116 passing assertions.
 
-**In progress:** Python, pytest, and Playwright UI automation through coursework. Runnable UI tests and CI/CD examples will be published after they have been implemented and verified.
+**UI automation:** [Python, pytest and Playwright coursework](playwright-python-saucedemo/README.md), with recorded passing local executions. CI/CD remains in progress.
 
 > Evidence is limited to observed test executions and documented artifacts; unverified browser coverage or post-fix retests are not claimed.
